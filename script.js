@@ -1,25 +1,25 @@
 
 const words = [
-  { word: "shadow", hint: "A dark shape made when something blocks light." },
-  { word: "castle", hint: "A fortified building often associated with kings." },
-  { word: "forest", hint: "A large area filled with trees." },
-  { word: "planet", hint: "A large object that orbits a star." },
-  { word: "puzzle", hint: "Something you solve using logic." },
-  { word: "dragon", hint: "A mythical creature that often breathes fire." },
-  { word: "guitar", hint: "A musical instrument with strings." },
-  { word: "island", hint: "Land completely surrounded by water." },
-  { word: "thunder", hint: "The loud sound that follows lightning." },
-  { word: "library", hint: "A place where you can borrow books." },
-  { word: "mystery", hint: "Something difficult to explain or understand." },
-  { word: "monster", hint: "A frightening imaginary creature." },
-  { word: "lantern", hint: "A portable light inside a protective case." },
-  { word: "vampire", hint: "A legendary creature that drinks blood." },
-  { word: "skeleton", hint: "The framework of bones inside a body." },
-  { word: "nightmare", hint: "A frightening dream." },
-  { word: "corridor", hint: "A passage connecting rooms in a building." },
-  { word: "footprint", hint: "A mark left by someone's foot." },
-  { word: "whisper", hint: "To speak very quietly." },
-  { word: "phantom", hint: "A ghostly or mysterious apparition." }
+    { word: "shadow", hint: "A dark shape made when something blocks light." },
+    { word: "castle", hint: "A fortress where royalty once lived." },
+    { word: "forest", hint: "A place where the trees hide the sunlight." },
+    { word: "planet", hint: "A world orbiting a star." },
+    { word: "puzzle", hint: "Something you must solve." },
+    { word: "dragon", hint: "A mythical creature that breathes fire." },
+    { word: "guitar", hint: "An instrument with strings." },
+    { word: "island", hint: "Land surrounded entirely by water." },
+    { word: "thunder", hint: "A sound that follows lightning." },
+    { word: "library", hint: "A place filled with books." },
+    { word: "mystery", hint: "Something that cannot easily be explained." },
+    { word: "monster", hint: "A frightening imaginary creature." },
+    { word: "lantern", hint: "A portable source of light." },
+    { word: "vampire", hint: "A legendary creature that drinks blood." },
+    { word: "skeleton", hint: "The bones that form a body's framework." },
+    { word: "nightmare", hint: "A frightening dream." },
+    { word: "corridor", hint: "A long passage connecting rooms." },
+    { word: "footprint", hint: "A mark left by a foot." },
+    { word: "whisper", hint: "Speaking in a very quiet voice." },
+    { word: "phantom", hint: "A ghostly apparition." }
 ];
 
 const wordElement = document.getElementById("word");
@@ -31,138 +31,161 @@ const newGameButton = document.getElementById("new-game");
 const bodyParts = document.querySelectorAll(".part");
 
 let answer = "";
-let hint = "";
 let guessedLetters = [];
 let mistakes = 0;
 let gameOver = false;
+let previousWord = "";
 
 function startGame() {
-  // Choose a random word and hint.
-  const choice = words[Math.floor(Math.random() * words.length)];
+    let choice;
 
-  answer = choice.word;
-  hint = choice.hint;
-  guessedLetters = [];
-  mistakes = 0;
-  gameOver = false;
+    // Avoid repeating the previous word when possible.
+    do {
+        choice = words[Math.floor(Math.random() * words.length)];
+    } while (words.length > 1 && choice.word === previousWord);
 
-  hintElement.textContent = hint;
-  mistakesElement.textContent = mistakes;
-  messageElement.textContent = "Choose a letter to begin.";
-  messageElement.className = "message";
+    answer = choice.word;
+    previousWord = answer;
+    guessedLetters = [];
+    mistakes = 0;
+    gameOver = false;
 
-  // Hide every part of the hangman.
-  bodyParts.forEach((part) => {
-    part.classList.remove("visible");
-  });
+    hintElement.textContent = choice.hint;
+    mistakesElement.textContent = "0";
+    messageElement.textContent =
+        "The connection is open. Choose a letter.";
+    messageElement.className = "message";
 
-  // Draw the empty word and reset the buttons.
-  renderWord();
-  renderKeyboard();
+    document.body.classList.remove("danger", "shake");
+
+    bodyParts.forEach((part) => {
+        part.classList.remove("visible");
+    });
+
+    renderWord();
+    renderKeyboard();
 }
 
 function renderWord() {
-  wordElement.replaceChildren();
+    wordElement.replaceChildren();
 
-  for (const letter of answer) {
-    const slot = document.createElement("span");
-    slot.className = "letter-slot";
+    for (const letter of answer) {
+        const slot = document.createElement("span");
+        slot.className = "letter-slot";
 
-    if (guessedLetters.includes(letter) || gameOver) {
-      slot.textContent = letter;
-    } else {
-      slot.textContent = "";
+        if (guessedLetters.includes(letter) || gameOver) {
+            slot.textContent = letter.toUpperCase();
+        }
+
+        wordElement.appendChild(slot);
     }
-
-    wordElement.appendChild(slot);
-  }
 }
 
 function renderKeyboard() {
-  keyboardElement.replaceChildren();
+    keyboardElement.replaceChildren();
 
-  for (let code = 65; code <= 90; code++) {
-    const letter = String.fromCharCode(code).toLowerCase();
-    const button = document.createElement("button");
+    for (let code = 65; code <= 90; code++) {
+        const letter = String.fromCharCode(code).toLowerCase();
+        const button = document.createElement("button");
 
-    button.type = "button";
-    button.className = "letter-button";
-    button.textContent = letter.toUpperCase();
-    button.setAttribute("aria-label", letter);
+        button.type = "button";
+        button.className = "letter-button";
+        button.textContent = letter.toUpperCase();
+        button.setAttribute("aria-label", letter);
 
-    if (guessedLetters.includes(letter)) {
-      button.disabled = true;
-      button.classList.add(
-        answer.includes(letter) ? "correct" : "wrong"
-      );
+        if (guessedLetters.includes(letter)) {
+            button.disabled = true;
+            button.classList.add(
+                answer.includes(letter) ? "correct" : "wrong"
+            );
+        }
+
+        if (gameOver) {
+            button.disabled = true;
+        }
+
+        button.addEventListener("click", () => guessLetter(letter));
+        keyboardElement.appendChild(button);
     }
-
-    if (gameOver) {
-      button.disabled = true;
-    }
-
-    button.addEventListener("click", () => guessLetter(letter));
-    keyboardElement.appendChild(button);
-  }
 }
 
 function guessLetter(letter) {
-  if (gameOver || guessedLetters.includes(letter)) {
-    return;
-  }
-
-  guessedLetters.push(letter);
-
-  if (answer.includes(letter)) {
-    messageElement.textContent = "Good guess! That letter is in the word.";
-  } else {
-    mistakes++;
-    mistakesElement.textContent = mistakes;
-
-    const part = document.querySelector(
-      `.part[data-part="${mistakes}"]`
-    );
-
-    if (part) {
-      part.classList.add("visible");
+    if (gameOver || guessedLetters.includes(letter)) {
+        return;
     }
 
-    messageElement.textContent = "Wrong letter! Try another.";
-  }
+    guessedLetters.push(letter);
 
-  // Check whether the player has won or lost.
-  if ([...answer].every((letter) => guessedLetters.includes(letter))) {
-    finishGame(true);
-  } else if (mistakes >= 6) {
-    finishGame(false);
-  }
+    if (answer.includes(letter)) {
+        messageElement.textContent = "The signal responds. Correct letter.";
+    } else {
+        mistakes++;
+        mistakesElement.textContent = mistakes;
 
-  renderWord();
-  renderKeyboard();
+        const part = document.querySelector(
+            `.part[data-part="${mistakes}"]`
+        );
+
+        if (part) {
+            part.classList.add("visible");
+        }
+
+        // Increase the horror as mistakes accumulate.
+        if (mistakes >= 2) {
+            document.body.classList.add("danger");
+        }
+
+        // Retrigger the shake animation on every wrong guess.
+        document.body.classList.remove("shake");
+        void document.body.offsetWidth;
+        document.body.classList.add("shake");
+
+        messageElement.textContent =
+            mistakes >= 4
+                ? "IT IS GETTING CLOSER. THINK CAREFULLY."
+                : "Wrong letter. Something moves in the dark.";
+
+        if (mistakes === 6) {
+            document.body.classList.add("danger");
+        }
+    }
+
+    if ([...answer].every((letter) => guessedLetters.includes(letter))) {
+        finishGame(true);
+    } else if (mistakes >= 6) {
+        finishGame(false);
+    }
+
+    renderWord();
+    renderKeyboard();
 }
 
 function finishGame(won) {
-  gameOver = true;
+    gameOver = true;
 
-  if (won) {
-    messageElement.textContent = "You won! You guessed the word!";
-    messageElement.className = "message win";
-  } else {
-    messageElement.textContent =
-      `Game over! The word was "${answer.toUpperCase()}".`;
-    messageElement.className = "message loss";
-  }
+    if (won) {
+        messageElement.textContent =
+            "YOU SURVIVED. But the signal has not disappeared.";
+        messageElement.className = "message win";
+    } else {
+        messageElement.textContent =
+            `SIGNAL LOST. The word was "${answer.toUpperCase()}".`;
+        messageElement.className = "message loss";
+
+        // Final visual effect when the player loses.
+        document.body.classList.add("danger");
+        document.body.classList.remove("shake");
+        void document.body.offsetWidth;
+        document.body.classList.add("shake");
+    }
 }
 
-// Allow players to use their physical keyboard too.
 document.addEventListener("keydown", (event) => {
-  if (/^[a-z]$/i.test(event.key)) {
-    guessLetter(event.key.toLowerCase());
-  }
+    if (/^[a-z]$/i.test(event.key)) {
+        guessLetter(event.key.toLowerCase());
+    }
 });
 
-// Start a fresh round when the button is clicked.
 newGameButton.addEventListener("click", startGame);
 
-// Start the first round immediately.
 startGame();
