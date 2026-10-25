@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+    <main class="game">
+        <header class="header">
+            <p class="eyebrow">THE WORD GUESSING GAME</p>
+            <h1>HANGMAN</h1>
+            <p class="subtitle">Guess the hidden word before you run out of chances.</p>
+        </header>
+
+        <section class="game-layout">
+            <div class="drawing-panel">
+                <svg id="hangman-drawing" viewBox="0 0 240 260" role="img" aria-label="Hangman drawing">
+                    <g class="gallows">
+                        <line x1="25" y1="235" x2="145" y2="235" />
+                        <line x1="55" y1="235" x2="55" y2="20" />
+                        <line x1="55" y1="20" x2="155" y2="20" />
+                        <line x1="155" y1="20" x2="155" y2="48" />
+                    </g>
+                    <g class="person">
+                        <circle class="part" data-part="1" cx="155" cy="68" r="20" />
+                        <line class="part" data-part="2" x1="155" y1="88" x2="155" y2="150" />
+                        <line class="part" data-part="3" x1="155" y1="105" x2="125" y2="130" />
+                        <line class="part" data-part="4" x1="155" y1="105" x2="185" y2="130" />
+                        <line class="part" data-part="5" x1="155" y1="150" x2="128" y2="190" />
+                        <line class="part" data-part="6" x1="155" y1="150" x2="182" y2="190" />
+                    </g>
+                </svg>
+                <p class="mistakes">Mistakes: <span id="mistakes">0</span> / 6</p>
+            </div>
+
+            <div class="play-panel">
+                <p class="section-label">HIDDEN WORD</p>
+                <div id="word" class="word" aria-label="Hidden word"></div>
+
+                <div class="hint-box">
+                    <span class="hint-label">HINT</span>
+                    <p id="hint">Your hint will appear here.</p>
+                </div>
+
+                <p id="message" class="message" aria-live="polite">
+                    Choose a letter to begin.
+                </p>
+
+                <div class="keyboard" id="keyboard" aria-label="Letter choices"></div>
+
+                <button id="new-game" class="new-game">New Game</button>
+            </div>
+        </section>
+
+        <footer>
+            <p>Choose wisely. Every wrong guess counts.</p>
+        </footer>
+    </main>
+</body>
+
+</html>
